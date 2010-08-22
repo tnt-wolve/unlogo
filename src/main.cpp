@@ -32,7 +32,6 @@ int main (int argc, char * const argv[])
     {
         frame = cap;
 		
-
 		g_filter.filter(frame, frame, true);
 		
 		frame.show( "out" );
