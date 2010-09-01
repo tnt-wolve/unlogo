@@ -43,7 +43,7 @@ namespace unlogo {
 		vector<KeyPoint> findFeatures(string alg_name);
 		vector<KeyPoint> findFeatures(string alg_name, Mat &bounds);
 		vector<KeyPoint> findFeatures();
-		vector<KeyPoint> updateFeatures( Image& previous );
+		vector<KeyPoint> updateFeatures( Image& previous, Mat& H ); // use optical flow to move features
 		Mat findDescriptors(string alg_name);
 		Mat findDescriptors();
 		void trainMatcher(string alg_name);

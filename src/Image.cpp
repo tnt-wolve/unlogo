@@ -74,7 +74,6 @@ namespace unlogo {
 		
 		other.cvImage.copyTo( cvImage );
 		features = other.features;
-		log(LOG_LEVEL_DEBUG, "in copyFromImage(), image now has %d features", features.size());
 		other.descriptors.copyTo( descriptors );
 		descriptorsCurrent = other.descriptorsCurrent;
 		featuresCurrent = other.featuresCurrent;
@@ -268,7 +267,7 @@ namespace unlogo {
 	
 	
 	//--------------------------------------------------
-	vector<KeyPoint> Image::updateFeatures( Image& previous )
+	vector<KeyPoint> Image::updateFeatures( Image& previous, Mat& H )
 	{		
 		features.clear();
 		
@@ -277,22 +276,44 @@ namespace unlogo {
 		vector<uchar> status;
 		vector<float> err;
 		calcOpticalFlowPyrLK(previous.cvImage, cvImage, prevPts, nextPts, status, err);
+		int npts = prevPts.size();
+		Mat prevMat(npts, 1, CV_32FC2);  // 4row 1col 2channel matrix
+		Mat nextMat(npts, 1, CV_32FC2);  // 4row 1col 2channel matrix
 		
-		for(int i=0; i<prevPts.size(); i++)
+		for(int i=0; i<npts; i++)
 		{
+			KeyPoint feature = previous.features[i];
+			
+			float* ptr = prevMat.ptr<float>(i);
+			ptr[0] = prevPts[i].x;
+			ptr[1] = prevPts[i].y;
+			
+			ptr = nextMat.ptr<float>(i);
+			ptr[0] = nextPts[i].x;
+			ptr[1] = nextPts[i].y;
+			
 			if(status[i]>0)
 			{
-				KeyPoint feature = previous.features[i];
 				feature.pt = nextPts[i];
 				features.push_back( feature );
-				
 			}
 			else
 			{
 				log(LOG_LEVEL_DEBUG, "LOST A KEYPOINT!");
 			}
 		}
+
 		
+		
+		H = findHomography(prevMat, nextMat, status, CV_RANSAC, 2);
+		
+		log(LOG_LEVEL_DEBUG, "===HOMOGRAPHY===");
+		for(int y=0; y<3; y++)
+		{
+			float* ptr = H.ptr<float>(y);
+			cout << ptr[0] << " " << ptr[1] << " " << ptr[2] << endl;
+		}
+		cout << endl;
 		return features;
 	}
 	

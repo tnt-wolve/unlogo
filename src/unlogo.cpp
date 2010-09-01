@@ -27,6 +27,7 @@ int targetframe;
 
 // Do we really need the points in all of these different formats?
 Mat contour;
+Point corners[4];
 
 extern "C" int init( const char* argstr )
 {
@@ -52,6 +53,7 @@ extern "C" int init( const char* argstr )
 			float* ptr = contour.ptr<float>(i);
 			ptr[0] = (float)atol(argv[j+0].c_str());
 			ptr[1] = (float)atol(argv[j+1].c_str());
+			corners[i] = Point(ptr[0], ptr[1]);
 		}
 		
 #ifdef DEBUG		
@@ -94,12 +96,32 @@ extern "C" int process( uint8_t* dst[4], int dst_stride[4],
 	
 	if(framenum > targetframe)
 	{
-		input.updateFeatures( prev );
+		Mat H;
+		input.updateFeatures( prev, H );
+
+		
+		Mat contourTmp;
+		perspectiveTransform(contour, contourTmp, H);
+		contour = contourTmp;
+		
+		for(int i=0; i<4; i++)
+		{
+			float* ptr = contour.ptr<float>(i);
+			corners[i] = Point(ptr[0], ptr[1]);
+			log(LOG_LEVEL_DEBUG, "Corner %d is now %f,%f", i, ptr[0], ptr[1]);
+		}
+		
+		
 		prev.copyFromImage( input );
+
+		
+		//input.drawFeatures();
+		const Point* pts[1] = {corners};
+		int npts[1] = {4};
+		fillPoly(input.cvImage, pts, npts, 1, CV_RGB(0,0,0));
 	}
 
-	input.drawFeatures();
-	
+
 	output.setData( width, height, dst[0], dst_stride[0] );		// point the 'output' image to the FFMPEG data array
 	output.copyFromImage(input);								// copy input into the output memory
 	output.text("unlogo", 10, height-10, .5);					// watermark, dude!
