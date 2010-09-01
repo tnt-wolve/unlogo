@@ -209,6 +209,10 @@
 					"$(inherited)",
 					/opt/local/lib,
 				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-DDEBUG",
+					"$(OTHER_CFLAGS)",
+				);
 				PRODUCT_NAME = unlogo;
 			};
 			name = Debug;

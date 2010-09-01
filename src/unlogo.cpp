@@ -18,60 +18,70 @@
 #include "OpticalFlow.h"
 #include "Logo.h"
 
-
-#define MATCHING_DELAY 10
-#define MATCHING_PCT_THRESHOLD 0.1
-#define GHOST_FRAMES_ALLOWED 50
-#define RANSAC_PROJECTION_THRESH 2
-
 using namespace unlogo;
-vector<Logo> logos;
-vector<Logo*> detected_logos;
+
+
 Image input, output, prev;
 int framenum=0;
+int targetframe;
 
+// Do we really need the points in all of these different formats?
+Point corners[4];
+Rect roi;
+Point topleft;
+Point botright;
+Mat contour;
 
 extern "C" int init( const char* argstr )
 {
 	try {
 		/* print a welcome message, and the OpenCV version */
-		printf ("Welcome to unlogo, using OpenCV version %s (%d.%d.%d)\n",
+		log(LOG_LEVEL_DEBUG, "Welcome to unlogo, using OpenCV version %s (%d.%d.%d)\n",
 				CV_VERSION, CV_MAJOR_VERSION, CV_MINOR_VERSION, CV_SUBMINOR_VERSION);
 		
 		// Parse arguments.
 		vector<string> argv = split(argstr, ":");
 		int argc = argv.size();
+		if(argc != 9) {
+			log(LOG_LEVEL_ERROR, "You must supply 9 arguments.");
+			exit(-1);
+		}
 		
-		if(argc<5 || argc%2!=1)
-		{
-			cout << "Usage" << endl;
-			cout << "[detector]:[descriptor]:[matcher]:[search:replace]..." << endl;
-			cout << "where [search:replace] is a list of images to look for and an image to replace it with. " << endl;
-			cout << "Detector Types: FAST, STAR, SIFT, SURF, MSER, GFTT, HARRIS" << endl;
-			cout << "Descriptor Types: SIFT, SURF" << endl;
-			cout << "Matcher Types: BruteForce, BruteForce-L1, FERN, ONEWAY, <CALONDER>" << endl;
-			return -1;
-		}
-
-		// Load in all of the logos from the arguments
-		for(int i=3; i<argc; i+=2)
-		{
-			logos.push_back( Logo() );
-			logos.back().name = argv[i].c_str();
-			logos.back().logo.open( argv[i].c_str() );
-			logos.back().logo.findFeatures("SIFT");
-			logos.back().logo.trainMatcher("ONEWAY");
+		
+		// Grab and parse arguments
+		// This is so un-elegant.
+		targetframe = atol(argv[0].c_str());
+		int i,j;
+		int minx=numeric_limits<int>::max();
+		int miny=numeric_limits<int>::max();
+		int maxx=0;
+		int maxy=0;
+		contour = Mat(4, 1, CV_32FC2);
+		for(i=0,j=1; i<4; i++,j+=2) {
+			corners[i]=Point2f(atol(argv[j].c_str()), atol(argv[j+1].c_str()));
+			minx=min(corners[i].x, minx); miny=min(corners[i].y, miny);
+			maxx=max(corners[i].x, maxx); maxy=max(corners[i].y, maxy);
 			
-			logos.back().replacement.open( argv[i+1].c_str() );
-			logos.back().replacement.convert( CV_RGBA2BGRA );
-			logos.back().ghostFrames=0;
-			logos.back().pos = Point2f(-1,-1);
-
-			log(LOG_LEVEL_DEBUG, "Loaded logo %s", argv[i].c_str());
+			float* ptr = contour.ptr<float>(i);
+			*ptr++ = corners[i].x;
+			*ptr++ = corners[i].y;
 		}
-
-		cvNamedWindow("input");		cvMoveWindow("input", 0, 0);
-		cvNamedWindow("output");	cvMoveWindow("output", 0, 510);
+		roi=Rect(minx, miny, maxx-minx, maxy-miny);
+		topleft = Point(minx, miny);
+		botright = Point(maxx, maxy);
+		// We want the contour to be relative to the roi.
+		for(int i=0; i<4; i++)
+		{
+			float *ptr = contour.ptr<float>(i);
+			(*ptr++) -= topleft.x;
+			(*ptr++) -= topleft.y;
+		}
+		cout << "---" << endl;
+		
+#ifdef DEBUG		
+		namedWindow("input");		cvMoveWindow("input", 0, 0);
+		namedWindow("output");		cvMoveWindow("output", 0, 510);
+#endif 
 		
 		return 0;
 	}
@@ -92,118 +102,50 @@ extern "C" int process( uint8_t* dst[4], int dst_stride[4],
 					   int width, int height)
 {
 	log(LOG_LEVEL_DEBUG, "=== Frame %d ===", framenum);
-	
 	input.setData( width, height, src[0], src_stride[0]);
-
 	if(input.empty()) return 1;
 
-	input.findFeatures("SURF");
-	input.findDescriptors("SIFT");
-	
-	// Doing matching is expensive. So we only do it every MATCHING_DELAY frames
-	// The rest of the time we just calculate the Optical Flow and 
-	// move any matched logos accordingly
-	bool doMatching = framenum==0 || framenum%MATCHING_DELAY==0 || detected_logos.size()==0;
-	if( doMatching )
-	{
-		detected_logos.clear();
-		
-		// Make a MatchSet for each frame/logo pair
-		for(int i=0; i<(int)logos.size(); i++)
-		{
-			vector<int> matches;
-			logos[i].logo.matchTo( input, matches );
-
-			Mat img_corr;
-			drawMatches(input.bw(), input.features, logos[i].logo.bw(), logos[i].logo.features, matches, img_corr);
-			imshow(logos[i].name, img_corr);
-			
-			/*
-			ms.drawMatchesInB();
-			
-			// If thet are a match, reset the ghost frames counter
-			// Otherwise, increase the ghost frames counter
-			if(ms.pctMatch() > MATCHING_PCT_THRESHOLD)
-			{
-				logos[i].ghostFrames=0;
-				logos[i].homography = ms.H12.clone();
-				lerp(logos[i].pos, ms.avgB(), 6.f);
-				detected_logos.push_back( &logos[i] );
-			}
-			else if(logos[i].ghostFrames<GHOST_FRAMES_ALLOWED)
-			{
-				logos[i].ghostFrames += MATCHING_DELAY;
-				detected_logos.push_back( &logos[i] );
-			}
-			else
-			{
-				// Don't put it into the detected_logos set
-			}
-			 */
-		}
-		
-		if(detected_logos.size()==0)
-		{
-			log(LOG_LEVEL_DEBUG, "Casual warning: Matchers ran and found no logos.");
-		}
-	}
-	else // do optical flow
-	{
-		// Do optical flow. Then just move detected_logos according to that.
-		Image next( input );
-		next.convert( CV_BGR2GRAY );
-		prev.convert( CV_BGR2GRAY );
-
-		for(int i=0; i<(int)detected_logos.size(); i++)
-		{
-			OpticalFlow flow = OpticalFlow(prev, next);
-			
-			flow.draw("flow");
-			
-			Rect region = Rect(detected_logos[i]->pos.x-20, detected_logos[i]->pos.y-20, 40, 40);
-			
-			detected_logos[i]->pos += flow.inRegion(region, Point2f(2,2));
-			//detected_logos[i]->pos += flow.avg( Point2f(6,6), 8 );
-		}
-	}
+#ifdef DEBUG
 	input.show("input");
-	
-	
+#endif
 	
 	// Before we draw onto it, keep a copy of this frame for optical flow detection next frame
 	prev = Image( input );
+
 	
 	
-	// Now draw detected_logos into input
-	// We need to add alpha channel for drawing.
-	input.convert(CV_BGR2BGRA);
-	for(int i=0; i<(int)detected_logos.size(); i++)
+	for(int i = 0; i < 4; i++ )
 	{
-		// Make it center-based.
-		Point2f draw_loc = detected_logos[i]->pos;
-		Size s = detected_logos[i]->replacement.size();
-		draw_loc.x -= (s.width / 2.);
-		draw_loc.y -= (s.height / 2.);
-		
-		// TO DO: Use logos[i].homography to warp the image...
-		
-		input.drawIntoMe( detected_logos[i]->replacement, draw_loc );
+		line( input.cvImage, corners[i%4], corners[(i+1)%4], Scalar(0,0,255) );
 	}
-	input.convert( CV_BGRA2BGR );  // Convert back
+	rectangle(input.cvImage, topleft, botright, Scalar(0,255,0));
+	
+	if(framenum==targetframe)
+	{
+		input(roi).drawFeatures("SURF", contour);
+		input.show("target");
+	}
 	
 	
-	// TO DO:  Something weird happening here.
-	//			setData() is not changing the size of the cvImage inside (it stays 0x0)
-	//			and this is setting off an alarm in copyFromImage
-	output.setData( width, height, dst[0], dst_stride[0] );
+
+	for(int i = 0; i < 4; i++ )
+	{
+		line( input.cvImage, corners[i%4], corners[(i+1)%4], Scalar(0,0,255) );
+	}
+	rectangle(input.cvImage, topleft, botright, Scalar(0,255,0));
+
+
+	output.setData( width, height, dst[0], dst_stride[0] );		// point the 'output' image to the FFMPEG data array
 	output.copyFromImage(input);								// copy input into the output memory
-	output.text("unlogo", 10, height-10, .5);
-	
+	output.text("unlogo", 10, height-10, .5);					// watermark, dude!
 	CV_Assert(&output.cvImage.data[0]==&dst[0][0]);				// Make sure output still points to dst
+
 	
-	
+#ifdef DEBUG	
 	output.show("output");
-	waitKey(1);
+	waitKey(1);	// needed to update windows.
+#endif
+
 	framenum++;
 	return 0;
 }

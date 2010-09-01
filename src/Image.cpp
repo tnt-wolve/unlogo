@@ -20,6 +20,13 @@ namespace unlogo {
 		matcherTrained=false;
 	}
 	
+	Image::Image(Mat& _cvImage)
+	{
+		cvImage = _cvImage;
+		descriptorsCurrent=false;
+		featuresCurrent=false;
+		matcherTrained=false;
+	}
 	
 	//--------------------------------------------------
 	Image::Image(int width, int height, uint8_t* data, int stride)
@@ -36,6 +43,12 @@ namespace unlogo {
 		copyFromImage( other );
 	}
 	
+	//--------------------------------------------------
+	Image Image::operator()(const Rect roi)
+	{
+		Mat subimg = cvImage(roi);
+		return Image( subimg );
+	}
 	
 #pragma mark ASSIGNMENT
 
@@ -392,7 +405,59 @@ namespace unlogo {
 		}
 	}
 	
+	//--------------------------------------------------
+	void Image::drawFeatures()
+	{
+		findFeatures();
+		for(int i=0; i<features.size(); i++)
+		{
+			Image::drawFeature(cvImage, features[i], CV_RGB(255,0,0), DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+		}
+	}
+	
+	//--------------------------------------------------
+	void Image::drawFeatures(string alg_name, Mat bounds)
+	{
+		findFeatures(alg_name);
+		for(int i=0; i<features.size(); i++)
+		{
+			if(pointPolygonTest(bounds,features[i].pt,false)>=0)
+				Image::drawFeature(cvImage, features[i], CV_RGB(0,255,0), DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+			else
+				Image::drawFeature(cvImage, features[i], CV_RGB(255,0,0), DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+		}
+	}
+	
 
+	//--------------------------------------------------
+	void Image::drawFeature( Mat& img, const KeyPoint& p, const Scalar& color, int flags )
+	{
+		Point center( cvRound(p.pt.x), cvRound(p.pt.y) );
+		
+		if( flags & DrawMatchesFlags::DRAW_RICH_KEYPOINTS )
+		{
+			int radius = cvRound(p.size/2); // KeyPoint::size is a diameter
+			
+			// draw the circles around keypoints with the keypoints size
+			circle( img, center, radius, color, 1, CV_AA );
+			
+			// draw orientation of the keypoint, if it is applicable
+			if( p.angle != -1 )
+			{
+				float srcAngleRad = p.angle*(float)CV_PI/180.f;
+				Point orient(cvRound(cos(srcAngleRad)*radius), 
+							 cvRound(sin(srcAngleRad)*radius));
+				line( img, center, center+orient, color, 1, CV_AA );
+			}
+		}
+		else
+		{
+			// draw center with R=3
+			int radius = 3;
+			circle( img, center, radius, color, 1, CV_AA );
+		}
+	}
+	
 	//--------------------------------------------------
 	void Image::text(const char* text, int x, int y, double scale, Scalar color )
 	{
