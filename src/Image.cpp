@@ -38,10 +38,13 @@ namespace unlogo {
 	}
 	
 	//--------------------------------------------------
+	/*
 	Image::Image(const Image& other)
 	{
 		copyFromImage( other );
 	}
+	*/
+	
 	
 	//--------------------------------------------------
 	Image Image::operator()(const Rect roi)
@@ -70,7 +73,8 @@ namespace unlogo {
 		}
 		
 		other.cvImage.copyTo( cvImage );
-		features = other.features;	
+		features = other.features;
+		log(LOG_LEVEL_DEBUG, "in copyFromImage(), image now has %d features", features.size());
 		other.descriptors.copyTo( descriptors );
 		descriptorsCurrent = other.descriptorsCurrent;
 		featuresCurrent = other.featuresCurrent;
@@ -160,14 +164,53 @@ namespace unlogo {
 	}
 	
 	//--------------------------------------------------
+	vector<KeyPoint> Image::findFeatures(string alg_name, Mat &bounds)
+	{
+		vector<KeyPoint> tempFeatures = findFeatures(alg_name);
+		features.clear();
+		for(int i=0; i<tempFeatures.size(); i++)
+		{
+			double inside = pointPolygonTest(bounds, features[i].pt, true);
+			if(inside>=0)
+			{
+				features.push_back( tempFeatures[i] );
+			}
+			else
+			{
+				double dist = abs(inside);
+				if(dist < (tempFeatures[i].size/2.))
+				{
+					features.push_back( tempFeatures[i] );
+				}
+			}
+		}
+		
+		log(LOG_LEVEL_DEBUG, "in findFeatures(), after filtering by bounds, there are %d features", features.size());
+		
+		for(int i=0; i<4; i++)
+		{
+			float *p1 = bounds.ptr<float>(i%4);
+			float *p2 = bounds.ptr<float>((i+1)%4);
+			log(LOG_LEVEL_DEBUG, "drawing line from (%f,%f) to (%f,%f)", p1[0], p1[1], p2[0],p2[1]);
+			line(cvImage, Point(p1[0], p1[1]), Point(p2[0],p2[1]), CV_RGB(255,255,255), 3);
+		}
+		
+		featuresCurrent=true;
+		return features;
+	}
+	
+	//--------------------------------------------------
 	// As of writing this, you can use:
 	// FAST, STAR, SIFT, SURF, MSER, GFTT, HARRIS, L
 	vector<KeyPoint> Image::findFeatures(string alg_name)
 	{
+		
+		if(featuresCurrent && featureAlgUsed.compare(alg_name)==0)
+		{
+			return features;
+		}
+		
 		log(LOG_LEVEL_DEBUG, "finding features using %s", alg_name.c_str());
-		
-		
-		if(featuresCurrent && featureAlgUsed.compare(alg_name)==0) return features;
 
 		if(empty())
 		{
@@ -220,6 +263,36 @@ namespace unlogo {
 		descriptorsCurrent = false;
 		matcherTrained=false;
 		featureAlgUsed=alg_name;
+		return features;
+	}
+	
+	
+	//--------------------------------------------------
+	vector<KeyPoint> Image::updateFeatures( Image& previous )
+	{		
+		features.clear();
+		
+		vector<Point2f> prevPts; KeyPoint::convert(previous.features, prevPts);
+		vector<Point2f> nextPts;
+		vector<uchar> status;
+		vector<float> err;
+		calcOpticalFlowPyrLK(previous.cvImage, cvImage, prevPts, nextPts, status, err);
+		
+		for(int i=0; i<prevPts.size(); i++)
+		{
+			if(status[i]>0)
+			{
+				KeyPoint feature = previous.features[i];
+				feature.pt = nextPts[i];
+				features.push_back( feature );
+				
+			}
+			else
+			{
+				log(LOG_LEVEL_DEBUG, "LOST A KEYPOINT!");
+			}
+		}
+		
 		return features;
 	}
 	
@@ -408,23 +481,9 @@ namespace unlogo {
 	//--------------------------------------------------
 	void Image::drawFeatures()
 	{
-		findFeatures();
 		for(int i=0; i<features.size(); i++)
 		{
 			Image::drawFeature(cvImage, features[i], CV_RGB(255,0,0), DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
-		}
-	}
-	
-	//--------------------------------------------------
-	void Image::drawFeatures(string alg_name, Mat bounds)
-	{
-		findFeatures(alg_name);
-		for(int i=0; i<features.size(); i++)
-		{
-			if(pointPolygonTest(bounds,features[i].pt,false)>=0)
-				Image::drawFeature(cvImage, features[i], CV_RGB(0,255,0), DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
-			else
-				Image::drawFeature(cvImage, features[i], CV_RGB(255,0,0), DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
 		}
 	}
 	

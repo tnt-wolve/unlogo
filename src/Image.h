@@ -31,7 +31,7 @@ namespace unlogo {
 		Image();
 		Image(Mat& _cvImage);
 		Image( int width, int height, uint8_t* data, int channels );
-		Image( const Image& other ); // The copy constructor is for creating a new object. It copies a existing object to a newly constructed object. 
+		//Image( const Image& other ); // The copy constructor is for creating a new object. It copies a existing object to a newly constructed object. 
 		void operator = ( const Image &other ); // The assignment operator is to deal with an already existing object. 
 		Image operator()(const Rect roi);
 		
@@ -41,7 +41,9 @@ namespace unlogo {
 		void convert( int code );
 		
 		vector<KeyPoint> findFeatures(string alg_name);
+		vector<KeyPoint> findFeatures(string alg_name, Mat &bounds);
 		vector<KeyPoint> findFeatures();
+		vector<KeyPoint> updateFeatures( Image& previous );
 		Mat findDescriptors(string alg_name);
 		Mat findDescriptors();
 		void trainMatcher(string alg_name);
@@ -55,7 +57,6 @@ namespace unlogo {
 		void text( const char* text, int x, int y, double scale=1, Scalar color=CV_RGB(255,255,255) );
 		static void drawFeature( Mat& img, const KeyPoint& p, const Scalar& color, int flags );
 		void drawFeatures();
-		void drawFeatures(string alg_name, Mat bounds);
 
 		void matchTo(Image &b, vector<int>& featureMatchesAtoB);
 		vector<Mat> pyramid(int maxLevel);
