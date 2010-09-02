@@ -7,6 +7,8 @@
  *
  */
 
+#define DEBUG 1
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -59,12 +61,21 @@ extern "C" int process( uint8_t* dst[4], int dst_stride[4],
 	{
 		char filename[255];
 		sprintf(filename, "%s/image_%05d.jpg", prefix.c_str(), numsaved);
+		input.convert(CV_BGR2RGB);
 		input.save(filename);
 		numsaved++;
 	}
-	//Image output(width, height, dst[0], dst_stride[0]);			// point the 'output' image to the FFMPEG data array	
-	//output.copyFromImage(input);								// copy input into the output memory
-	//CV_Assert(&output.cvImage.data[0]==&dst[0][0]);				// Make sure output still points to dst
+		
+#ifdef DEBUG
+	input.show("output");
+	waitKey(100);
+#endif
+	
+	Image output(width, height, dst[0], dst_stride[0]);			// point the 'output' image to the FFMPEG data array	
+	output.copyFromImage(input);								// copy input into the output memory
+	CV_Assert(&output.cvImage.data[0]==&dst[0][0]);				// Make sure output still points to dst
+
+	
 	framenum++;
 	return 0;
 }
