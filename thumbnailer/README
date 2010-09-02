@@ -1,1 +1,1 @@
-../bin/ffmpeg -qscale 2 -i ../share/videos/IMG_0092.MOV -vf plugin=thumbnailer.so:20:~/Desktop/test out.mov
+../bin/ffmpeg -qscale 2 -i ../share/videos/IMG_0092.MOV -vf plugin=thumbnailer.so:20:~/Desktop/test -y dummy.mov
