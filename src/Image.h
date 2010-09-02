@@ -62,6 +62,8 @@ namespace unlogo {
 		vector<Mat> pyramid(int maxLevel);
 		Mat bw();
 		
+		void save(const char* filename);
+		
 		// cvImage accessor convenience methods
 		bool empty();
 		Size size();

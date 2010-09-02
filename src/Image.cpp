@@ -270,17 +270,19 @@ namespace unlogo {
 	
 	//--------------------------------------------------
 	vector<KeyPoint> Image::updateFeatures( Image& previous, Mat& H )
-	{		
+	{	
+		
 		vector<Point2f> prevPts; KeyPoint::convert(previous.features, prevPts);
+		int nPrevPts = prevPts.size();
 		vector<Point2f> nextPts;
 		vector<uchar> status;
 		vector<float> err;
 		calcOpticalFlowPyrLK(previous.cvImage, cvImage, prevPts, nextPts, status, err);
-		int npts = prevPts.size();
+		
 
 		
 		features.clear();
-		for(int i=0; i<npts; i++)
+		for(int i=0; i<nPrevPts; i++)
 		{
 			if(status[i]>0)
 			{
@@ -289,11 +291,10 @@ namespace unlogo {
 				features.push_back( feature );
 			}
 		}
-		int ptsLost=npts-features.size();
-		if(ptsLost>0)
-			log(LOG_LEVEL_DEBUG, "%f%% points lost in flow calculation, leaving %d", (ptsLost/(float)npts)*100, features.size());
+		int pctPtsLost=features.size() / (float)nPrevPts;
 		
-		if(npts>3)
+		
+		if(nPrevPts>3)
 		{
 			Mat prevMat = points2mat(prevPts);
 			Mat nextMat = points2mat(nextPts);
@@ -304,8 +305,7 @@ namespace unlogo {
 			{
 				if(status[i]>0) ptsUsedInHomography++;
 			}
-			if(ptsUsedInHomography>0)
-				log(LOG_LEVEL_DEBUG, "%f%% points used in homography", (ptsUsedInHomography/(float)npts)*100);
+			//log(LOG_LEVEL_DEBUG, "%f%% points used in homography", (ptsUsedInHomography/(float)npts)*100);
 		}
 		return features;
 	}
@@ -457,6 +457,14 @@ namespace unlogo {
 		featuresCurrent=false;
 
 		return 0;
+	}
+	
+	void Image::save(const char* path) 
+	{
+		std::vector<int> params;
+		params.push_back(CV_IMWRITE_JPEG_QUALITY);
+		params.push_back(100);
+		imwrite(path, cvImage, params);	
 	}
 	
 	//--------------------------------------------------

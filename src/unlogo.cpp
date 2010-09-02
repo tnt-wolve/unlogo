@@ -34,7 +34,6 @@ Point corners[4];
 extern "C" int init( const char* argstr )
 {
 	try {
-		/* print a welcome message, and the OpenCV version */
 		log(LOG_LEVEL_DEBUG, "Welcome to unlogo, using OpenCV version %s (%d.%d.%d)\n",
 				CV_VERSION, CV_MAJOR_VERSION, CV_MINOR_VERSION, CV_SUBMINOR_VERSION);
 		
@@ -110,8 +109,6 @@ extern "C" int process( uint8_t* dst[4], int dst_stride[4],
 		input.updateFeatures( prev, homography );
 		prev.copyFromImage( input );
 		float pctFeaturesRemaining = input.features.size()/(float)inititalFeatures;
-		
-		log(LOG_LEVEL_DEBUG, "%f%% of features remaining", pctFeaturesRemaining);
 		
 		if(pctFeaturesRemaining<.2)
 		{
