@@ -84,6 +84,18 @@ Mat points2mat(vector<Point2f> pts)
 	return out;
 }
 
+Mat points2mat(vector<Point> pts)
+{
+	Mat out(pts.size(), 1, CV_32FC2);
+	for(int i=0; i<pts.size(); i++)
+	{
+		float* ptr = out.ptr<float>(i);
+		ptr[0] = pts[i].x;
+		ptr[1] = pts[i].y;
+	}
+	return out;
+}
+
 void Sort4PointsClockwise(Point2f points[4]){
     Point2f& a = points[0];
     Point2f& b = points[1];
