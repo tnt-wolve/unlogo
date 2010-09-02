@@ -20,7 +20,7 @@
 using namespace unlogo;
 
 
-Image input, output, prev;
+Image input, prev;
 int framenum=0;
 int targetframe;
 int inititalFeatures;
@@ -62,7 +62,7 @@ extern "C" int init( const char* argstr )
 		
 #ifdef DEBUG		
 		namedWindow("input");		cvMoveWindow("input", 0, 0);
-		namedWindow("output");		cvMoveWindow("output", 0, 510);
+		namedWindow("output");		cvMoveWindow("output", 650, 0);
 #endif 
 		
 		return 0;
@@ -109,13 +109,18 @@ extern "C" int process( uint8_t* dst[4], int dst_stride[4],
 		
 		if(pctFeaturesRemaining<.2)
 		{
-			log(LOG_LEVEL_DEBUG, "Only %f%% features remaining.  Done!", pctFeaturesRemaining);
+			char failMessage[255];
+			sprintf(failMessage, "Only %f%% features remaining.  Done!", pctFeaturesRemaining);
+			input.text(failMessage, 10, height-10, .5);
+			log(LOG_LEVEL_DEBUG, failMessage);
 			targetFound=false;
 		}
 		
 		if(homography.empty())
 		{
-			log(LOG_LEVEL_DEBUG, "Empty Homography.  Done!");
+			const char* failMessage =  "Empty Homography.  Done!";
+			log(LOG_LEVEL_DEBUG, failMessage);
+			input.text(failMessage, 10, height-10, .5);
 			targetFound=false;
 		}
 		
@@ -125,21 +130,28 @@ extern "C" int process( uint8_t* dst[4], int dst_stride[4],
 		
 		if(!isContourConvex(contour))
 		{
-			log(LOG_LEVEL_DEBUG, "Box is not convex. Done!");
+			const char* failMessage = "Box is not convex. Done!";
+			log(LOG_LEVEL_DEBUG, failMessage);
+			input.text(failMessage, 10, height-10, .5);
 			targetFound=false;
 		}
 		
 		double area = contourArea(contour);
 		if(area<50)
 		{
-			log(LOG_LEVEL_DEBUG, "Box is too small.  Done!");
+			const char* failMessage = "Box is too small.  Done!";
+			log(LOG_LEVEL_DEBUG, failMessage);
+			input.text(failMessage, 10, height-10, .5);
 			targetFound=false;
 		}
 		
-		double areaDiff = area/(float)initialArea;
+		float areaDiff = area/(float)initialArea;
 		if(areaDiff > 5 || areaDiff < .1)
 		{
-			log(LOG_LEVEL_DEBUG, "Box is %fx its original size.  Done!", areaDiff);
+			char failMessage[255];
+			sprintf(failMessage,"Box is %fx its original size.  Done!", areaDiff);
+			input.text(failMessage, 10, height-10, .5);
+			log(LOG_LEVEL_DEBUG, failMessage);
 			targetFound=false;
 		}
 	}
@@ -159,10 +171,10 @@ extern "C" int process( uint8_t* dst[4], int dst_stride[4],
 		int npts[1] = {4};
 		fillPoly(input.cvImage, pts, npts, 1, CV_RGB(0,0,0));	
 	}
-	
-	output.setData( width, height, dst[0], dst_stride[0] );		// point the 'output' image to the FFMPEG data array
+
+	Image output(width, height, dst[0], dst_stride[0]); // point the 'output' image to the FFMPEG data array	
 	output.copyFromImage(input);								// copy input into the output memory
-	output.text("unlogo", 10, height-10, .5);					// watermark, dude!
+
 	CV_Assert(&output.cvImage.data[0]==&dst[0][0]);				// Make sure output still points to dst
 
 	
