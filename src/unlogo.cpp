@@ -15,7 +15,6 @@
 #include <iostream>
 
 #include "Image.h"
-#include "OpticalFlow.h"
 #include "Logo.h"
 
 using namespace unlogo;
@@ -24,6 +23,10 @@ using namespace unlogo;
 Image input, output, prev;
 int framenum=0;
 int targetframe;
+int inititalFeatures;
+double initialArea;
+Mat homography;
+bool targetFound;
 
 // Do we really need the points in all of these different formats?
 Mat contour;
@@ -55,6 +58,7 @@ extern "C" int init( const char* argstr )
 			ptr[1] = (float)atol(argv[j+1].c_str());
 			corners[i] = Point(ptr[0], ptr[1]);
 		}
+		initialArea = contourArea(contour);
 		
 #ifdef DEBUG		
 		namedWindow("input");		cvMoveWindow("input", 0, 0);
@@ -79,7 +83,7 @@ extern "C" int process( uint8_t* dst[4], int dst_stride[4],
 					   uint8_t* src[4], int src_stride[4],
 					   int width, int height)
 {
-	log(LOG_LEVEL_DEBUG, "=== Frame %d ===", framenum);
+	cout << "(frame " << framenum << ")  ";
 	input.setData( width, height, src[0], src_stride[0]);
 	if(input.empty()) return 1;
 
@@ -91,37 +95,71 @@ extern "C" int process( uint8_t* dst[4], int dst_stride[4],
 	{
 		input.findFeatures("SURF", contour);
 		prev.copyFromImage( input );
-		input.show("target");
+		inititalFeatures = input.features.size();
+		targetFound = true;
 	}
 	
-	if(framenum > targetframe)
+	if(targetFound)
 	{
-		Mat H;
-		input.updateFeatures( prev, H );
-
+		input.updateFeatures( prev, homography );
+		prev.copyFromImage( input );
+		float pctFeaturesRemaining = input.features.size()/(float)inititalFeatures;
+		
+		log(LOG_LEVEL_DEBUG, "%f%% of features remaining", pctFeaturesRemaining);
+		
+		if(pctFeaturesRemaining<.2)
+		{
+			log(LOG_LEVEL_DEBUG, "Only %f%% features remaining.  Done!", pctFeaturesRemaining);
+			targetFound=false;
+		}
+		
+		if(homography.empty())
+		{
+			log(LOG_LEVEL_DEBUG, "Empty Homography.  Done!");
+			targetFound=false;
+		}
 		
 		Mat contourTmp;
-		perspectiveTransform(contour, contourTmp, H);
+		perspectiveTransform(contour, contourTmp, homography);
 		contour = contourTmp;
 		
+		if(!isContourConvex(contour))
+		{
+			log(LOG_LEVEL_DEBUG, "Box is not convex. Done!");
+			targetFound=false;
+		}
+		
+		double area = contourArea(contour);
+		if(area<50)
+		{
+			log(LOG_LEVEL_DEBUG, "Box is too small.  Done!");
+			targetFound=false;
+		}
+		
+		double areaDiff = area/(float)initialArea;
+		if(areaDiff > 5 || areaDiff < .1)
+		{
+			log(LOG_LEVEL_DEBUG, "Box is %fx its original size.  Done!", areaDiff);
+			targetFound=false;
+		}
+	}
+
+	if(targetFound)
+	{
+		// Move corner points fowards the homography points
 		for(int i=0; i<4; i++)
 		{
 			float* ptr = contour.ptr<float>(i);
-			corners[i] = Point(ptr[0], ptr[1]);
-			log(LOG_LEVEL_DEBUG, "Corner %d is now %f,%f", i, ptr[0], ptr[1]);
+			Point flow(ptr[0], ptr[1]);
+			lerp(corners[i], flow, 1.8);
 		}
 		
-		
-		prev.copyFromImage( input );
-
-		
-		//input.drawFeatures();
+		// Draw the rect.
 		const Point* pts[1] = {corners};
 		int npts[1] = {4};
-		fillPoly(input.cvImage, pts, npts, 1, CV_RGB(0,0,0));
+		fillPoly(input.cvImage, pts, npts, 1, CV_RGB(0,0,0));	
 	}
-
-
+	
 	output.setData( width, height, dst[0], dst_stride[0] );		// point the 'output' image to the FFMPEG data array
 	output.copyFromImage(input);								// copy input into the output memory
 	output.text("unlogo", 10, height-10, .5);					// watermark, dude!
@@ -130,7 +168,7 @@ extern "C" int process( uint8_t* dst[4], int dst_stride[4],
 	
 #ifdef DEBUG	
 	output.show("output");
-	waitKey(1);	// needed to update windows.
+	waitKey(3);	// needed to update windows.
 #endif
 
 	framenum++;

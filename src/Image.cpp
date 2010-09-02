@@ -186,13 +186,14 @@ namespace unlogo {
 		
 		log(LOG_LEVEL_DEBUG, "in findFeatures(), after filtering by bounds, there are %d features", features.size());
 		
+#ifdef DEBUG		
 		for(int i=0; i<4; i++)
 		{
 			float *p1 = bounds.ptr<float>(i%4);
 			float *p2 = bounds.ptr<float>((i+1)%4);
-			log(LOG_LEVEL_DEBUG, "drawing line from (%f,%f) to (%f,%f)", p1[0], p1[1], p2[0],p2[1]);
-			line(cvImage, Point(p1[0], p1[1]), Point(p2[0],p2[1]), CV_RGB(255,255,255), 3);
+			//line(cvImage, Point(p1[0], p1[1]), Point(p2[0],p2[1]), CV_RGB(255,255,255), 3);
 		}
+#endif
 		
 		featuresCurrent=true;
 		return features;
@@ -265,55 +266,47 @@ namespace unlogo {
 		return features;
 	}
 	
+
 	
 	//--------------------------------------------------
 	vector<KeyPoint> Image::updateFeatures( Image& previous, Mat& H )
 	{		
-		features.clear();
-		
 		vector<Point2f> prevPts; KeyPoint::convert(previous.features, prevPts);
 		vector<Point2f> nextPts;
 		vector<uchar> status;
 		vector<float> err;
 		calcOpticalFlowPyrLK(previous.cvImage, cvImage, prevPts, nextPts, status, err);
 		int npts = prevPts.size();
-		Mat prevMat(npts, 1, CV_32FC2);  // 4row 1col 2channel matrix
-		Mat nextMat(npts, 1, CV_32FC2);  // 4row 1col 2channel matrix
+
 		
+		features.clear();
 		for(int i=0; i<npts; i++)
 		{
-			KeyPoint feature = previous.features[i];
-			
-			float* ptr = prevMat.ptr<float>(i);
-			ptr[0] = prevPts[i].x;
-			ptr[1] = prevPts[i].y;
-			
-			ptr = nextMat.ptr<float>(i);
-			ptr[0] = nextPts[i].x;
-			ptr[1] = nextPts[i].y;
-			
 			if(status[i]>0)
 			{
+				KeyPoint feature = previous.features[i];
 				feature.pt = nextPts[i];
 				features.push_back( feature );
 			}
-			else
-			{
-				log(LOG_LEVEL_DEBUG, "LOST A KEYPOINT!");
-			}
 		}
-
+		int ptsLost=npts-features.size();
+		if(ptsLost>0)
+			log(LOG_LEVEL_DEBUG, "%f%% points lost in flow calculation, leaving %d", (ptsLost/(float)npts)*100, features.size());
 		
-		
-		H = findHomography(prevMat, nextMat, status, CV_RANSAC, 2);
-		
-		log(LOG_LEVEL_DEBUG, "===HOMOGRAPHY===");
-		for(int y=0; y<3; y++)
+		if(npts>3)
 		{
-			float* ptr = H.ptr<float>(y);
-			cout << ptr[0] << " " << ptr[1] << " " << ptr[2] << endl;
+			Mat prevMat = points2mat(prevPts);
+			Mat nextMat = points2mat(nextPts);
+			
+			H = findHomography(prevMat, nextMat, status, CV_RANSAC, 2);
+			int ptsUsedInHomography=0;
+			for(int i=0; i<status.size(); i++)
+			{
+				if(status[i]>0) ptsUsedInHomography++;
+			}
+			if(ptsUsedInHomography>0)
+				log(LOG_LEVEL_DEBUG, "%f%% points used in homography", (ptsUsedInHomography/(float)npts)*100);
 		}
-		cout << endl;
 		return features;
 	}
 	
