@@ -50,15 +50,14 @@ extern "C" int init( const char* argstr )
 		contour = Mat(4, 1, CV_32FC2);  // 4row 1col 2channel matrix
 		int i,j;
 		float x, y;
-		float total;
+		float total=0;
 		for(i=0,j=1; i<4; i++,j+=2)
 		{
-			x = atof(argv[j+0].c_str());
-			y = atof(argv[j+1].c_str());
 			float* ptr = contour.ptr<float>(i);
-			ptr[0] = x;
-			ptr[1] = y;
-			total += x;	
+			ptr[0] = (float)atof(argv[j+0].c_str());
+			ptr[1] = (float)atof(argv[j+1].c_str());
+			cout << ptr[0] << ", " << ptr[1] << endl;
+			total += ptr[0];	
 		}
 
 		// Ghetto way of determining whether coordinates are normalized to
@@ -72,7 +71,7 @@ extern "C" int init( const char* argstr )
 		vector<Point2f> hull;
 		convexHull(contour, hull, true); 
 		contour = points2mat(hull);
-		initialArea = contourArea(contour);
+		
 		
 #ifdef DEBUG		
 		namedWindow("input");		cvMoveWindow("input", 0, 0);
@@ -108,6 +107,19 @@ extern "C" int process( uint8_t* dst[4], int dst_stride[4],
 	
 	if(framenum == targetframe)
 	{
+		if(coordsNormalized)
+		{
+			Mat newcontour = Mat(4, 1, CV_32FC2);
+			for(int i=0; i<4; i++)
+			{
+				float* ptr1 = contour.ptr<float>(i);
+				float* ptr2 = newcontour.ptr<float>(i);
+				ptr2[0] = (float)(ptr1[0]*width);
+				ptr2[1] = (float)(ptr1[1]*height);
+			}
+			contour = newcontour;
+		}
+		initialArea = contourArea(contour);
 		input.findFeatures("SURF", contour);
 		prev.copyFromImage( input );
 		inititalFeatures = input.features.size();
@@ -179,11 +191,6 @@ extern "C" int process( uint8_t* dst[4], int dst_stride[4],
 		{
 			float* ptr = contour.ptr<float>(i);
 			corners[i] = Point(ptr[0], ptr[1]);
-			if(coordsNormalized)
-			{
-				corners[i].x += width;
-				corners[i].y *= height;
-			}
 			//lerp(corners[i], flow, 1.8);
 		}
 		
