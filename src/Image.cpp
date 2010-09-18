@@ -31,11 +31,12 @@ namespace unlogo {
 	}
 	
 	//--------------------------------------------------
+	/*
 	Image::Image(const Image& other)
 	{
 		copyFromImage( other );
 	}
-	
+	*/
 	
 #pragma mark ASSIGNMENT
 
@@ -357,6 +358,13 @@ namespace unlogo {
 		featuresCurrent=false;
 
 		return 0;
+	}
+	
+	
+	//--------------------------------------------------
+	void Image::equalizeHist() 
+	{
+		cv::equalizeHist(cvImage, cvImage);
 	}
 	
 	//--------------------------------------------------

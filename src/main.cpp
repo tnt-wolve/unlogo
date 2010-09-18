@@ -17,6 +17,7 @@
 #include <string.h>
 #include <iostream>
 #include <highgui.h>
+#include "ulUtils.h"
 
 // Bring in the functions from unlogo.cpp
 extern "C" {
@@ -39,8 +40,17 @@ int dst_stride[4];
 
 int main(int argc, char * const argv[])
 {
-	// Open the video
-	cv::VideoCapture cap(argv[1]);
+	cv::VideoCapture cap;
+	if(argc < 2)
+	{
+		cap.open(0);
+	}
+	else
+	{
+		// Open the video
+		cap.open(argv[1]);
+	}
+
 	cap.set(CV_CAP_PROP_CONVERT_RGB, 1);
 	
     if(!cap.isOpened())  
@@ -53,8 +63,10 @@ int main(int argc, char * const argv[])
 	dst[0]= new uint8_t[ width* height * 3 ];
 	dst_stride[0] = width * 3;
 	
-	init(argv[2]);													// from unlogo.cpp
+	cap.set(CV_CAP_PROP_POS_FRAMES, 120);
 	
+	
+	init(argv[2]);													// from unlogo.cpp
 
 	cv::Mat frame;
 	for(;;)
@@ -66,11 +78,12 @@ int main(int argc, char * const argv[])
 		src_stride[0] = frame.step;
 		
 		process(dst, dst_stride, src, src_stride, width, height);  // from unlogo.cpp
+		
+		waitKey(1);
+		
 	}
 	
-	
 	uninit();														// from unlogo.cpp
-	
 	
 	std::cout << "Exiting ..." << std::endl;
 	return 0;

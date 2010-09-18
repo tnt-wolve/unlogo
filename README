@@ -1,16 +1,15 @@
-UNLOGO
-By Jeff Crouse and Kashif Bilal
+THE MOUSTACHIZER
+By Jeff Crouse
 jefftimesten at gmail dot com
-with support from Minnesota Art on Wheels and Eyebeam
 
 This software is licensed under the GNU-GPL version 3 or later.
 
-Unlogo is free software; you can redistribute it and/or
+THE MOUSTACHIZER is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public
 License as published by the Free Software Foundation; either
 version 3 of the License, or (at your option) any later version.
 
-Unlogo is distributed in the hope that it will be useful,
+THE MOUSTACHIZER is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 General Public License for more details.
@@ -24,7 +23,7 @@ REQUIREMENTS
 
 	svn co https://code.ros.org/svn/opencv/trunk/opencv -r 3513
 	cd opencv
-	patch -p0 -i PATH_TO_UNLOGO/opencv_unlogo_fixes_rev3515.patch
+	patch -p0 -i ../opencv_unlogo_fixes_rev3515.patch
 	sudo cmake -G "Unix Makefiles" .
 	sudo make
 	sudo make install
@@ -39,7 +38,7 @@ REQUIREMENTS
 BUILDING
 ========================
 
-The Unlogo filter uses the 'plugin' AVFilter for FFMPEG written by Kashif Balil.  This greatly simplifies and speeds up the process of making a filter by allowing the user to reference a shared object when running FFMPEG rather than having to recompile all of FFMPEG with every change. So the first thing you need to do is compile a version of FFMPEG with the 'plugin' filter.   
+The THE MOUSTACHIZER filter uses the 'plugin' AVFilter for FFMPEG written by Michael Droese.  This greatly simplifies and speeds up the process of making a filter by allowing the user to reference a shared object when running FFMPEG rather than having to recompile all of FFMPEG with every change. So the first thing you need to do is compile a version of FFMPEG with the 'plugin' filter.   
 Note:  Libavfilter is only available in the 0.6 branch. Older version of FFMPEG will not work. 
 
 - Run checkout.sh
@@ -53,7 +52,7 @@ Note:  Libavfilter is only available in the 0.6 branch. Older version of FFMPEG 
 	make
 	make install
 
-- Now make logo.so by running 'make' from the root directory.  Make sure you've already installed the requirements listed above
+- Now make moustachizer.so by running 'make' from the root directory.  Make sure you've already installed the requirements listed above
 
 - You're done!  
 
@@ -64,20 +63,7 @@ INSTRUCTIONS FOR USE
 
 To use the filter, make sure to use the version of FFMPEG that you just built, and then do something like this: 
 
-	ffmpeg -qscale 2 -i [input video] -vf plugin=unlogo.so:[detector type]:[descriptor extracor type]:[matcher type]:[logo image(s)] -y [output file name]
-
-	ffmpeg -qscale 2 -i share/videos/IMG_0092.MOV -vf plugin=unlogo.so:SURF:SURF:BruteForce:share/logos/Dior.jpg:share/faces/Dior.png -y out.mov
-
-Possible values as of OpenCV 3513 are:
-
-- Detector Types
-	FAST, STAR, SIFT, SURF, MSER, GFTT, HARRIS
-	
-- Descriptor Types
-	SIFT, SURF
-	
-- Descriptor Matcher Types
-	BruteForce, BruteForce-L1
+	ffmpeg -qscale 2 -i [input video] -vf plugin=moustachizer.so -y [output file name]
 
 
 
@@ -92,30 +78,24 @@ TROUBLESHOOTING
 to this:
 
 	CMAKE_BUILD_TYPE:STRING=Debug
-	CMAKE_INSTALL_PREFIX:PATH=[YOUR_PATH_TO_UNLOGO]
+	CMAKE_INSTALL_PREFIX:PATH=[YOUR_PATH_TO_MOUSTACHIZER]
 	
 You can change this by running the following instead of the cmake line listed above:
 	
 	sudo ccmake -i -G "Unix Makefiles" .
 
-The first puts debug symbols into OpenCV so that you can track down errors.  The second builds OpenCV in your Unlogo directory so that you don't contaminate your system with our "patched" (hacked) version.
+The first puts debug symbols into OpenCV so that you can track down errors.  The second builds OpenCV in your MOUSTACHIZER directory so that you don't contaminate your system with our "patched" (hacked) version.
 
-- Unlogo uses a lot of bleeding-edge stuff. Update your MacPorts!
+- THE MOUSTACHIZER uses a lot of bleeding-edge stuff. Update your MacPorts!
 
 	sudo port selfupdate
 	sudo port upgrade outdated
 
 - make logo.so
 On OS X 10.5 (gcc version 4.0.1) change the Makefile
-g++ -shared -o unlogo.so $(OBJS) $(LIBS)
-g++ -bundle -o unlogo.so $(OBJS) $(LIBS)
+g++ -shared -o THE MOUSTACHIZER.so $(OBJS) $(LIBS)
+g++ -bundle -o THE MOUSTACHIZER.so $(OBJS) $(LIBS)
 (http://stackoverflow.com/questions/1494407/undefined-symbol-main-when-trying-to-build-shared-library-g-mac)
-
-- If you get "error: boost/algorithm/string.hpp: No such file or directory" 
-	
-	specify the path to your boost installation in the Makefile INCLUDES
-
-	-I/usr/bin/boost_1_44_0
 
 
 TO DO

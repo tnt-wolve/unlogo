@@ -20,7 +20,7 @@
 #include "opencv2/features2d/features2d.hpp"
 #include <highgui.h>
 #include <cvaux.h>
-#include "vt100.h"
+
 
 
 using namespace std;
