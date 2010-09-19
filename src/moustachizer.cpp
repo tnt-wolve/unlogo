@@ -13,14 +13,8 @@
 #include <stdint.h>
 #include <string.h>
 #include <iostream>
-
 #include "Image.h"
 
-
-#define MATCHING_DELAY 10
-#define MATCHING_PCT_THRESHOLD 0.1
-#define GHOST_FRAMES_ALLOWED 50
-#define RANSAC_PROJECTION_THRESH 2
 
 using namespace unlogo;
 Image input, output, gray, prev, moustache;
@@ -35,26 +29,25 @@ extern "C" int init( const char* argstr )
 		printf ("Welcome to unlogo, using OpenCV version %s (%d.%d.%d)\n",
 				CV_VERSION, CV_MAJOR_VERSION, CV_MINOR_VERSION, CV_SUBMINOR_VERSION);
 		
-		if( !faceFinder.load( "share/opencv/haarcascades/haarcascade_frontalface_alt.xml" ) )
-		{
+		if( !faceFinder.load( "share/opencv/haarcascades/haarcascade_frontalface_alt.xml" ) ) {
 			log(LOG_LEVEL_ERROR, "Could not load classifier cascade");
 			return -1;
 		}
 			
-		if( !eyeFinder.load( "share/opencv/haarcascades/haarcascade_eye_tree_eyeglasses.xml" ) )
-		{
+		if( !eyeFinder.load( "share/opencv/haarcascades/haarcascade_eye_tree_eyeglasses.xml" ) ) {
 			log(LOG_LEVEL_WARNING, "Could not load classifier cascade for nested objects");
 			return -1;
 		}
 		
 		moustache.open("moustache.png");
 		
+#ifdef XCODE_DEBUG
 		cvNamedWindow("input");		cvMoveWindow("input", 0, 0);
 		cvNamedWindow("output");	cvMoveWindow("output", 0, 510);
+#endif
 		
 		return 0;
-	}
-	catch ( ... ) {
+	} catch ( ... ) {
 		log(LOG_LEVEL_ERROR, "Error in init()");
 		return -1;
 	}
@@ -76,8 +69,10 @@ extern "C" int process( uint8_t* dst[4], int dst_stride[4],
 	input.setData( width, height, src[0], src_stride[0]);
 
 	if(input.empty()) return 1;
-
+	
+#ifdef XCODE_DEBUG
 	input.show("input");
+#endif
 	
 	// Before we draw onto it, keep a copy of this frame for optical flow detection next frame
 	prev = Image( input );
@@ -105,7 +100,7 @@ extern "C" int process( uint8_t* dst[4], int dst_stride[4],
         center.x = r->x + r->width * 0.5;
         center.y =r->y + r->height * 0.5;
         radius = cvRound((r->width + r->height)*0.25);
-        //circle( img, center, radius, color, 3, 8, 0 );
+        circle( input.cvImage, center, radius, CV_RGB(255,0,0), 3, 8, 0 );
 
 		
         graySubImg = gray.cvImage(*r);
@@ -131,7 +126,7 @@ extern "C" int process( uint8_t* dst[4], int dst_stride[4],
             center.x = cvRound(r->x + eye->x + eye->width * 0.5);
             center.y = cvRound(r->y + eye->y + eye->height * 0.5);
             radius = cvRound((eye->width + eye->height)*0.25);
-            //circle( img, center, radius, color, 3, 8, 0 );
+            circle( input.cvImage, center, radius, CV_RGB(0,255,0), 3, 8, 0 );
         }
     }
 	
@@ -144,7 +139,10 @@ extern "C" int process( uint8_t* dst[4], int dst_stride[4],
 	
 	CV_Assert(&output.cvImage.data[0]==&dst[0][0]);				// Make sure output still points to dst
 	
+#ifdef XCODE_DEBUG	
 	output.show( "output" );
+#endif
+	
 	framenum++;
 	return 0;
 }

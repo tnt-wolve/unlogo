@@ -82,8 +82,9 @@ int main(int argc, char * const argv[])
 		waitKey(1);
 		
 	}
-	
+#ifdef XCODE_DEBUG	
 	uninit();														// from unlogo.cpp
+#endif
 	
 	std::cout << "Exiting ..." << std::endl;
 	return 0;

@@ -29,7 +29,7 @@
 		1FB5A6101245CB64004B51B7 /* libjpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FB5A60B1245CB64004B51B7 /* libjpeg.a */; };
 		1FB5A6121245CB64004B51B7 /* libpng14.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FB5A60D1245CB64004B51B7 /* libpng14.a */; };
 		1FB5A6131245CB64004B51B7 /* libtiff.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FB5A60E1245CB64004B51B7 /* libtiff.a */; };
-		1FEA1C2D12455097002CBEC7 /* moustachizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1FEA1C2C12455097002CBEC7 /* moustachizer.cpp */; };
+		1FB5A6741245E69D004B51B7 /* moustachizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1FB5A6731245E69D004B51B7 /* moustachizer.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -70,7 +70,7 @@
 		1FB5A60B1245CB64004B51B7 /* libjpeg.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libjpeg.a; path = lib/libjpeg.a; sourceTree = SOURCE_ROOT; };
 		1FB5A60D1245CB64004B51B7 /* libpng14.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpng14.a; path = lib/libpng14.a; sourceTree = SOURCE_ROOT; };
 		1FB5A60E1245CB64004B51B7 /* libtiff.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libtiff.a; path = lib/libtiff.a; sourceTree = SOURCE_ROOT; };
-		1FEA1C2C12455097002CBEC7 /* moustachizer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = moustachizer.cpp; sourceTree = SOURCE_ROOT; };
+		1FB5A6731245E69D004B51B7 /* moustachizer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moustachizer.cpp; path = src/moustachizer.cpp; sourceTree = SOURCE_ROOT; };
 		8DD76F6C0486A84900D96B5E /* unlogo */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = unlogo; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -136,7 +136,7 @@
 		1F08A61B122374D400DE8879 /* Unlogo */ = {
 			isa = PBXGroup;
 			children = (
-				1FEA1C2C12455097002CBEC7 /* moustachizer.cpp */,
+				1FB5A6731245E69D004B51B7 /* moustachizer.cpp */,
 				1F2E1A8F1221A0E100B7FED1 /* Image.h */,
 				1F2E1A8E1221A0E100B7FED1 /* Image.cpp */,
 				1F2E1A901221A0E100B7FED1 /* ulUtils.cpp */,
@@ -239,7 +239,7 @@
 				1F2E1A931221A0E100B7FED1 /* main.cpp in Sources */,
 				1F2E1A951221A0E100B7FED1 /* Image.cpp in Sources */,
 				1F2E1A961221A0E100B7FED1 /* ulUtils.cpp in Sources */,
-				1FEA1C2D12455097002CBEC7 /* moustachizer.cpp in Sources */,
+				1FB5A6741245E69D004B51B7 /* moustachizer.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
