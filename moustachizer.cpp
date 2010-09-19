@@ -43,8 +43,10 @@ extern "C" int init( const char* argstr )
 		
 		moustache.open("moustache.png");
 		
+#ifdef XCODE_DEBUG
 		cvNamedWindow("input");		cvMoveWindow("input", 0, 0);
 		cvNamedWindow("output");	cvMoveWindow("output", 0, 510);
+#endif
 		
 		return 0;
 	}
@@ -70,8 +72,10 @@ extern "C" int process( uint8_t* dst[4], int dst_stride[4],
 	input.setData( width, height, src[0], src_stride[0]);
 
 	if(input.empty()) return 1;
-
+	
+#ifdef XCODE_DEBUG
 	input.show("input");
+#endif
 	
 	// Before we draw onto it, keep a copy of this frame for optical flow detection next frame
 	prev = Image( input );
@@ -137,8 +141,12 @@ extern "C" int process( uint8_t* dst[4], int dst_stride[4],
 	output.text("unlogo", 10, height-10, .5);
 	
 	CV_Assert(&output.cvImage.data[0]==&dst[0][0]);				// Make sure output still points to dst
-	
+
+#ifdef XCODE_DEBUG
 	output.show( "output" );
+#endif
+	
+	
 	framenum++;
 	return 0;
 }

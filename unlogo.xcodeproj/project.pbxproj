@@ -261,6 +261,10 @@
 				);
 				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = "\"$(SRCROOT)/lib\"";
+				OTHER_CPLUSPLUSFLAGS = (
+					"-DXCODE_DEBUG",
+					"$(OTHER_CFLAGS)",
+				);
 				PRODUCT_NAME = unlogo;
 			};
 			name = Debug;
@@ -277,6 +281,10 @@
 				);
 				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = "\"$(SRCROOT)/lib\"";
+				OTHER_CPLUSPLUSFLAGS = (
+					"-DXCODE_DEBUG",
+					"$(OTHER_CFLAGS)",
+				);
 				PRODUCT_NAME = unlogo;
 			};
 			name = Release;
