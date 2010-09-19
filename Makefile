@@ -3,7 +3,7 @@ CPPFLAGS = -fPIC -O0 -g -Wall -W -Llib
 INCLUDES = -Iinclude -Iinclude/opencv 
 SRCS     = src/moustachizer.cpp src/Image.cpp src/ulUtils.cpp
 OBJS     = $(SRCS:.cpp=.o)
-LIBS     = -lopencv_core.2.1.1 -lopencv_imgproc.2.1.1 -lopencv_highgui.2.1.1 -lopencv_ml.2.1.1 -lopencv_video.2.1.1 -lopencv_features2d.2.1.1 -lopencv_calib3d.2.1.1 -lopencv_objdetect.2.1.1 -lopencv_contrib.2.1.1 -lopencv_legacy.2.1.1
+LIBS     = -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_ml -lopencv_video -lopencv_features2d -lopencv_calib3d -lopencv_objdetect -lopencv_contrib -lopencv_legacy -ljasper -ljpeg -lpng14 -ltiff -framework QTKit -lz -framework Cocoa -framework Foundation -framework CoreVideo -framework vecLib
 
 
 all: $(OBJS)

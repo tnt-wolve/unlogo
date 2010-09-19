@@ -48,7 +48,7 @@ Note:  Libavfilter is only available in the 0.6 branch. Older version of FFMPEG 
 - Configure and build FFMPEG as you normally would. Google is full of tutorials of how to build FFMPEG on your particular platform.  This works for me:
 
 	cd ffmpeg
-	./configure --arch=x86 --enable-libmp3lame --enable-libx264 --enable-nonfree --enable-gpl --enable-shared --disable-doc --prefix=..
+	./configure --arch=x86 --enable-libmp3lame --enable-libx264 --enable-nonfree --enable-gpl --disable-doc --prefix=..
 	make
 	make install
 
@@ -72,11 +72,13 @@ TROUBLESHOOTING
 
 - You might want to consider changing the following build options in OpenCV from the defaults:
 
+	BUILD_SHARED_LIBS:BOOL=ON
 	CMAKE_BUILD_TYPE:STRING=
 	CMAKE_INSTALL_PREFIX:PATH=/usr/local
 	
 to this:
-
+	
+	BUILD_SHARED_LIBS:BOOL=OFF
 	CMAKE_BUILD_TYPE:STRING=Debug
 	CMAKE_INSTALL_PREFIX:PATH=[YOUR_PATH_TO_MOUSTACHIZER]
 	

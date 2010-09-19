@@ -13,14 +13,8 @@
 #include <stdint.h>
 #include <string.h>
 #include <iostream>
-
 #include "Image.h"
 
-
-#define MATCHING_DELAY 10
-#define MATCHING_PCT_THRESHOLD 0.1
-#define GHOST_FRAMES_ALLOWED 50
-#define RANSAC_PROJECTION_THRESH 2
 
 using namespace unlogo;
 Image input, output, gray, prev, moustache;
@@ -105,7 +99,7 @@ extern "C" int process( uint8_t* dst[4], int dst_stride[4],
         center.x = r->x + r->width * 0.5;
         center.y =r->y + r->height * 0.5;
         radius = cvRound((r->width + r->height)*0.25);
-        //circle( img, center, radius, color, 3, 8, 0 );
+        circle( input.cvImage, center, radius, CV_RGB(255,0,0), 3, 8, 0 );
 
 		
         graySubImg = gray.cvImage(*r);
@@ -131,13 +125,13 @@ extern "C" int process( uint8_t* dst[4], int dst_stride[4],
             center.x = cvRound(r->x + eye->x + eye->width * 0.5);
             center.y = cvRound(r->y + eye->y + eye->height * 0.5);
             radius = cvRound((eye->width + eye->height)*0.25);
-            //circle( img, center, radius, color, 3, 8, 0 );
+            circle( input.cvImage, center, radius, CV_RGB(0,255,0), 3, 8, 0 );
         }
     }
 	
 	
 	
-	input.convert(CV_RGBA2RGB);
+	input.convert( CV_RGBA2RGB );
 	output.setData( width, height, dst[0], dst_stride[0] );
 	output.copyFromImage(input);								// copy input into the output memory
 	output.text("unlogo", 10, height-10, .5);
