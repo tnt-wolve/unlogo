@@ -18,7 +18,7 @@
 				PBXFileTableDataSourceColumnWidthsKey = (
 					22,
 					300,
-					558.58349609375,
+					659,
 				);
 				PBXFileTableDataSourceColumnsKey = (
 					PBXExecutablesDataSource_ActiveFlagID,
@@ -31,7 +31,7 @@
 				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
 				PBXFileTableDataSourceColumnWidthsKey = (
 					20,
-					671,
+					771,
 					20,
 					48,
 					43,
@@ -70,12 +70,12 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 308942075;
-			PBXWorkspaceStateSaveDate = 308942075;
+			PBXPerProjectTemplateStateSaveDate = 308958786;
+			PBXWorkspaceStateSaveDate = 308958786;
 		};
 		perUserProjectItems = {
-			1FA77D95126A143D001517EA /* PBXTextBookmark */ = 1FA77D95126A143D001517EA /* PBXTextBookmark */;
-			1FA77D9D126A186E001517EA /* PBXTextBookmark */ = 1FA77D9D126A186E001517EA /* PBXTextBookmark */;
+			1FA7CA81126A569F00EDF717 /* PBXTextBookmark */ = 1FA7CA81126A569F00EDF717 /* PBXTextBookmark */;
+			1FA7CAA0126A56E500EDF717 /* PBXTextBookmark */ = 1FA7CAA0126A56E500EDF717 /* PBXTextBookmark */;
 		};
 		sourceControlManager = 1F2927F71264186100792190 /* Source Control */;
 		userBuildSettings = {
@@ -83,9 +83,9 @@
 	};
 	1F2927F41264186100792190 /* pixelize.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {852, 975}}";
-			sepNavSelRange = "{1199, 0}";
-			sepNavVisRange = "{0, 1187}";
+			sepNavIntBoundsRect = "{{0, 0}, {949, 975}}";
+			sepNavSelRange = "{383, 0}";
+			sepNavVisRange = "{228, 1371}";
 		};
 	};
 	1F2927F71264186100792190 /* Source Control */ = {
@@ -118,7 +118,7 @@
 			YES,
 		);
 		argumentStrings = (
-			"-i data/Foucault.mp4",
+			"-i data/moml.mp4",
 			"-qscale 2",
 			"-vf plugin=build/Debug/libpixelize.dylib:blah",
 			"-y out.mov",
@@ -171,25 +171,25 @@
 		path = ../../bin/ffmpeg;
 		sourceTree = SOURCE_ROOT;
 	};
-	1FA77D95126A143D001517EA /* PBXTextBookmark */ = {
+	1FA7CA81126A569F00EDF717 /* PBXTextBookmark */ = {
 		isa = PBXTextBookmark;
 		fRef = 1F2927F41264186100792190 /* pixelize.cpp */;
 		name = "pixelize.cpp: 63";
 		rLen = 0;
-		rLoc = 1199;
+		rLoc = 1202;
 		rType = 0;
-		vrLen = 1187;
-		vrLoc = 0;
+		vrLen = 379;
+		vrLoc = 806;
 	};
-	1FA77D9D126A186E001517EA /* PBXTextBookmark */ = {
+	1FA7CAA0126A56E500EDF717 /* PBXTextBookmark */ = {
 		isa = PBXTextBookmark;
 		fRef = 1F2927F41264186100792190 /* pixelize.cpp */;
-		name = "pixelize.cpp: 63";
+		name = "pixelize.cpp: 24";
 		rLen = 0;
-		rLoc = 1199;
+		rLoc = 383;
 		rType = 0;
-		vrLen = 1187;
-		vrLoc = 0;
+		vrLen = 1371;
+		vrLoc = 228;
 	};
 	D2AAC0620554660B00DB518D /* pixelize */ = {
 		activeExec = 0;
