@@ -219,10 +219,10 @@ clear
 echo -------------------------
 echo "Checking out and building OpenCV"
 echo -------------------------
-svn co -r 3713 https://code.ros.org/svn/opencv/trunk/opencv 
+svn co https://code.ros.org/svn/opencv/trunk/opencv 
 cd opencv
 patch -p0 -i $PREFIX/share/patches/opencv_framehack_rev3713.patch
-$PREFIX/bin/cmake -G "Unix Makefiles" -D BUILD_NEW_PYTHON_SUPPORT=OFF -D BUILD_TESTS=OFF -D BUILD_SHARED_LIBS=OFF -D CMAKE_BUILD_TYPE=Debug -D CMAKE_INSTALL_PREFIX=$PREFIX .
+$PREFIX/bin/cmake -G "Unix Makefiles" -D WITH_JASPER=OFF -D WITH_JPEG=OFF -D WITH_PNG=OFF -D WITH_TIFF=OFF -D BUILD_EXAMPLES=OFF -D BUILD_NEW_PYTHON_SUPPORT=OFF -D BUILD_TESTS=OFF -D BUILD_SHARED_LIBS=OFF -D CMAKE_BUILD_TYPE=Debug -D CMAKE_INSTALL_PREFIX=$PREFIX .
 make && make install
 cd $PREFIX/dist
 
