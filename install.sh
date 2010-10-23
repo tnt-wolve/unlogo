@@ -13,6 +13,10 @@ export CPPFLAGS="-I$PREFIX/include"
 export LDFLAGS="-L$PREFIX/lib"
 export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
 
+WGET=wget
+type -P wget &>/dev/null || { 
+WGET=curl -L -O
+}
 
 clear
 echo -------------------------
@@ -38,7 +42,7 @@ clear
 echo -------------------------
 echo "Downloading and building LAME"
 echo -------------------------
-curl -L -O http://downloads.sourceforge.net/project/lame/lame/3.98.4/lame-3.98.4.tar.gz
+${WGET} http://downloads.sourceforge.net/project/lame/lame/3.98.4/lame-3.98.4.tar.gz
 tar -xvf lame-3.98.4.tar.gz
 cd lame-3.98.4
 ./configure --prefix=$PREFIX -enable-shared=no
@@ -50,7 +54,7 @@ clear
 echo -------------------------
 echo "Downloading and building YASM"
 echo -------------------------
-curl -L -O http://www.tortall.net/projects/yasm/releases/yasm-1.1.0.tar.gz
+${WGET} http://www.tortall.net/projects/yasm/releases/yasm-1.1.0.tar.gz
 tar -xvf yasm-1.1.0.tar.gz
 cd yasm-1.1.0
 ./configure --prefix=$PREFIX
@@ -62,7 +66,7 @@ clear
 echo -------------------------
 echo "Downloading and building FAAC"
 echo -------------------------
-curl -L -O http://downloads.sourceforge.net/faac/faac-1.28.tar.gz
+${WGET} http://downloads.sourceforge.net/faac/faac-1.28.tar.gz
 tar -xvf faac-1.28.tar.gz
 cd faac-1.28
 ./configure --prefix=$PREFIX --enable-shared=no
@@ -74,7 +78,7 @@ clear
 echo -------------------------
 echo "Downloading and building opencore-arm"
 echo -------------------------
-curl -L -O http://downloads.sourceforge.net/project/opencore-amr/opencore-amr/0.1.2/opencore-amr-0.1.2.tar.gz
+${WGET} http://downloads.sourceforge.net/project/opencore-amr/opencore-amr/0.1.2/opencore-amr-0.1.2.tar.gz
 tar -xvf opencore-amr-0.1.2.tar.gz
 cd opencore-amr-0.1.2
 ./configure --enable-shared=no --prefix=$PREFIX
@@ -86,7 +90,7 @@ clear
 echo -------------------------
 echo "Downloading and building libogg"
 echo -------------------------
-curl -L -O http://downloads.xiph.org/releases/ogg/libogg-1.2.0.tar.gz
+${WGET} http://downloads.xiph.org/releases/ogg/libogg-1.2.0.tar.gz
 tar -xvf libogg-1.2.0.tar.gz
 cd libogg-1.2.0
 ./configure --enable-shared=no --prefix=$PREFIX
@@ -98,7 +102,7 @@ clear
 echo -------------------------
 echo "Downloading and building libvorbis"
 echo -------------------------
-curl -L -O http://downloads.xiph.org/releases/vorbis/libvorbis-1.3.1.tar.gz
+${WGET} http://downloads.xiph.org/releases/vorbis/libvorbis-1.3.1.tar.gz
 tar -xvf libvorbis-1.3.1.tar.gz
 cd libvorbis-1.3.1
 ./configure --enable-shared=no --prefix=$PREFIX
@@ -110,7 +114,7 @@ clear
 echo -------------------------
 echo "Downloading and building libtheora"
 echo -------------------------
-curl -L -O http://downloads.xiph.org/releases/theora/libtheora-1.1.1.tar.bz2
+${WGET} http://downloads.xiph.org/releases/theora/libtheora-1.1.1.tar.bz2
 tar -xvf libtheora-1.1.1.tar.bz2
 cd libtheora-1.1.1
 ./configure --enable-shared=no --prefix=$PREFIX --with-ogg=$PREFIX --with-vorbis=$PREFIX
@@ -122,7 +126,7 @@ clear
 echo -------------------------
 echo "Checking out and building x264"
 echo -------------------------
-curl -L -O ftp://ftp.videolan.org/pub/videolan/x264/snapshots/x264-snapshot-20100922-2245.tar.bz2
+${WGET} ftp://ftp.videolan.org/pub/videolan/x264/snapshots/x264-snapshot-20100922-2245.tar.bz2
 tar -xvf x264-snapshot-20100922-2245.tar.bz2
 cd x264-snapshot-20100922-2245
 ./configure --prefix=$PREFIX
@@ -134,7 +138,7 @@ clear
 echo -------------------------
 echo "Checking out and building xvidcore"
 echo -------------------------
-curl -L -O http://downloads.xvid.org/downloads/xvidcore-1.2.2.tar.gz
+${WGET} http://downloads.xvid.org/downloads/xvidcore-1.2.2.tar.gz
 tar -xvf xvidcore-1.2.2.tar.gz
 cd xvidcore/build/generic
 ./configure --prefix=$PREFIX
@@ -197,7 +201,7 @@ cd $PREFIX/dist
 # echo -------------------------
 # echo "Downloading and building TIFF"
 # echo -------------------------
-# curl -L -O ftp://ftp.remotesensing.org/pub/libtiff/tiff-3.9.4.tar.gz
+# ${WGET} ftp://ftp.remotesensing.org/pub/libtiff/tiff-3.9.4.tar.gz
 # tar -xvf tiff-3.9.4.tar.gz
 # cd tiff-3.9.4
 # ./configure --enable-shared=no --prefix=$PREFIX
@@ -211,7 +215,7 @@ clear
 echo -------------------------
 echo "Checking out and building CMake"
 echo -------------------------
-curl -L -O http://www.cmake.org/files/v2.8/cmake-2.8.2.tar.gz
+${WGET} http://www.cmake.org/files/v2.8/cmake-2.8.2.tar.gz
 tar -xvf cmake-2.8.2.tar.gz
 cd cmake-2.8.2
 ./configure --prefix=$PREFIX
